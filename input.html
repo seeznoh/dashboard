@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+    <base target="_top">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <title>데이터 입력 및 조회 - 주식 자산 관리</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -12,9 +12,9 @@
     <nav class="bg-white border-b border-gray-200 px-6 py-4 flex flex-wrap justify-between items-center gap-3 shadow-sm">
         <h1 class="text-xl font-bold text-gray-800">📈 투자 포트폴리오 대시보드</h1>
         <div class="flex items-center space-x-4">
-            <span id="statusBadge" class="text-xs bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-medium">온라인 시트 불러오는 중...</span>
-            <a href="index.html" class="text-gray-500 hover:text-gray-800 pb-1">1. 대시보드</a>
-            <a href="input.html" class="font-semibold text-blue-600 border-b-2 border-blue-600 pb-1">2. 데이터 입력</a>
+            <span id="statusBadge" class="text-xs bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-medium">시트 데이터 불러오는 중...</span>
+            <a href="<?= appUrl ?>?page=index" class="text-gray-500 hover:text-gray-800 pb-1">1. 대시보드</a>
+            <a href="<?= appUrl ?>?page=input" class="font-semibold text-blue-600 border-b-2 border-blue-600 pb-1">2. 데이터 입력</a>
         </div>
     </nav>
 
@@ -22,7 +22,7 @@
         <!-- 상단 안내 및 새로고침 -->
         <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div class="text-sm text-blue-900">
-                <span class="font-bold">온라인 시트 연동 모드:</span> Google 시트의 <span class="font-semibold">자산_입력_및_지수비교</span> 탭과 실시간 동기화됩니다. 금액 입력 시 자릿수(,)가 자동 표기되며, 입력 및 삭제 시 시트에 반영됩니다.
+                <span class="font-bold">Google 계정 보안 연동 모드:</span> <span class="font-semibold">자산_입력_및_지수비교</span> 시트와 직접 통신합니다.
             </div>
             <button type="button" id="reloadBtn" class="shrink-0 bg-white border border-blue-300 text-blue-700 hover:bg-blue-100 text-xs font-semibold px-3.5 py-2 rounded-lg transition">
                 데이터 새로고침
@@ -65,7 +65,7 @@
                 <div class="text-sm font-bold text-gray-800">계산된 신규 행 미리보기 (A~F열 기준)</div>
                 <div id="calcSummaryText" class="text-sm text-gray-700"></div>
                 <div class="pt-1">
-                    <div class="text-xs text-gray-500 mb-1">Google 시트의 다음 빈 행 A열에 바로 붙여넣을 수 있는 값:</div>
+                    <div class="text-xs text-gray-500 mb-1">Google 시트 A열 붙여넣기용 값:</div>
                     <input type="text" id="tsvOutput" readonly class="w-full px-3 py-2 text-xs font-mono bg-white border border-gray-300 rounded-lg text-gray-800">
                 </div>
             </div>
@@ -98,14 +98,13 @@
                 </thead>
                 <tbody id="dataTableBody" class="divide-y divide-gray-200 text-gray-700">
                     <tr>
-                        <td colspan="11" class="px-4 py-8 text-center text-gray-400">온라인 데이터를 불러오는 중입니다...</td>
+                        <td colspan="11" class="px-4 py-8 text-center text-gray-400">시트 데이터를 불러오는 중입니다...</td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </main>
 
-    <script src="app.js"></script>
     <script>
         let sheetItems = [];
 
@@ -142,50 +141,7 @@
             return Number(val).toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
-        function callSheetApi(paramsObj) {
-            return new Promise((resolve, reject) => {
-                const callbackName = 'handleSheetCallback_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
-                const script = document.createElement('script');
-                const timeout = setTimeout(() => {
-                    cleanup();
-                    reject(new Error('요청 시간 초과'));
-                }, 12000);
-
-                function cleanup() {
-                    clearTimeout(timeout);
-                    delete window[callbackName];
-                    if (script.parentNode) script.parentNode.removeChild(script);
-                }
-
-                window[callbackName] = function(res) {
-                    cleanup();
-                    if (!res) {
-                        reject(new Error('빈 응답을 받았습니다.'));
-                    } else if (res.error) {
-                        reject(new Error(res.error));
-                    } else {
-                        resolve(res);
-                    }
-                };
-
-                script.onerror = function() {
-                    cleanup();
-                    reject(new Error('Apps Script 웹 앱 호출 실패'));
-                };
-
-                const queryParts = Object.entries(paramsObj).map(
-                    ([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`
-                );
-                queryParts.push(`callback=${encodeURIComponent(callbackName)}`);
-                queryParts.push(`_t=${Date.now()}`);
-
-                const sep = SHEET_API_URL.includes('?') ? '&' : '?';
-                script.src = `${SHEET_API_URL}${sep}${queryParts.join('&')}`;
-                document.body.appendChild(script);
-            });
-        }
-
-        async function handleDeleteRow(month) {
+        function handleDeleteRow(month) {
             const ok = confirm(`'${month}' 데이터를 Google 시트에서 삭제하시겠습니까?`);
             if (!ok) return;
 
@@ -193,17 +149,16 @@
             statusBadge.className = 'text-xs bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-medium';
             statusBadge.innerText = `'${month}' 삭제 중...`;
 
-            try {
-                await callSheetApi({ action: 'delete', month: month });
-                await loadSheetData();
-                statusBadge.className = 'text-xs bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-medium';
-                statusBadge.innerText = `'${month}' 시트에서 삭제 완료`;
-            } catch (err) {
-                console.error(err);
-                statusBadge.className = 'text-xs bg-rose-100 text-rose-800 px-3 py-1 rounded-full font-medium';
-                statusBadge.innerText = '삭제 오류: ' + err.message;
-                alert(`삭제 실패: ${err.message}\nApps Script 코드에 action=delete 처리가 반영되어 있는지 확인해 주세요.`);
-            }
+            google.script.run
+                .withSuccessHandler(() => {
+                    loadSheetData();
+                })
+                .withFailureHandler((err) => {
+                    statusBadge.className = 'text-xs bg-rose-100 text-rose-800 px-3 py-1 rounded-full font-medium';
+                    statusBadge.innerText = '삭제 오류: ' + err.message;
+                    alert('삭제 실패: ' + err.message);
+                })
+                .deletePortfolioRow(month);
         }
 
         function renderTable(items) {
@@ -211,7 +166,6 @@
             const rowCountText = document.getElementById('rowCountText');
             const totalCumDividendText = document.getElementById('totalCumDividendText');
 
-            // 월이 존재하는 모든 행의 배당금을 누락 없이 합산
             const monthItems = items.filter(item => item.month);
             let runningDiv = 0;
             const withCumDiv = monthItems.map(item => {
@@ -256,29 +210,28 @@
             });
         }
 
-        async function loadSheetData() {
+        function loadSheetData() {
             const statusBadge = document.getElementById('statusBadge');
             statusBadge.className = 'text-xs bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-medium';
-            statusBadge.innerText = '온라인 시트 불러오는 중...';
+            statusBadge.innerText = '시트 데이터 불러오는 중...';
 
-            try {
-                const items = await fetchOnlineSheetData();
-                sheetItems = items;
-                renderTable(sheetItems);
-                statusBadge.className = 'text-xs bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-medium';
-                statusBadge.innerText = '온라인 시트 연동됨';
-            } catch (err) {
-                console.error(err);
-                statusBadge.className = 'text-xs bg-rose-100 text-rose-800 px-3 py-1 rounded-full font-medium';
-                statusBadge.innerText = '연동 오류: ' + err.message;
-                document.getElementById('dataTableBody').innerHTML =
-                    `<tr><td colspan="11" class="px-4 py-8 text-center text-rose-500">데이터 로드 실패: ${err.message}</td></tr>`;
-            }
+            google.script.run
+                .withSuccessHandler((res) => {
+                    sheetItems = (res && res.items) ? res.items : [];
+                    renderTable(sheetItems);
+                    statusBadge.className = 'text-xs bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-medium';
+                    statusBadge.innerText = 'Google 계정 보안 연동됨';
+                })
+                .withFailureHandler((err) => {
+                    statusBadge.className = 'text-xs bg-rose-100 text-rose-800 px-3 py-1 rounded-full font-medium';
+                    statusBadge.innerText = '연동 오류: ' + err.message;
+                })
+                .getPortfolioData();
         }
 
         document.getElementById('reloadBtn').addEventListener('click', loadSheetData);
 
-        document.getElementById('inputForm').addEventListener('submit', async function(e) {
+        document.getElementById('inputForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
             const saveBtn = document.getElementById('saveBtn');
@@ -314,9 +267,21 @@
             statusBadge.className = 'text-xs bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-medium';
             statusBadge.innerText = `'${month}' 시트 저장 중...`;
 
-            try {
-                await callSheetApi({
-                    action: 'add',
+            google.script.run
+                .withSuccessHandler(() => {
+                    saveBtn.disabled = false;
+                    saveBtn.innerText = '누적원금 · 평가손익 · 누적배당 계산 및 시트 저장';
+                    loadSheetData();
+                    alert(`'${month}' 데이터가 Google 시트에 저장되었습니다.`);
+                })
+                .withFailureHandler((err) => {
+                    saveBtn.disabled = false;
+                    saveBtn.innerText = '누적원금 · 평가손익 · 누적배당 계산 및 시트 저장';
+                    statusBadge.className = 'text-xs bg-rose-100 text-rose-800 px-3 py-1 rounded-full font-medium';
+                    statusBadge.innerText = '저장 오류: ' + err.message;
+                    alert('저장 실패: ' + err.message);
+                })
+                .addPortfolioRow({
                     month: month,
                     deposit: deposit,
                     cumulativePrincipal: cumulativePrincipal,
@@ -324,20 +289,6 @@
                     profit: profit,
                     dividend: dividend
                 });
-
-                await loadSheetData();
-                statusBadge.className = 'text-xs bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-medium';
-                statusBadge.innerText = `'${month}' 시트 저장 완료`;
-                alert(`'${month}' 데이터가 Google 시트에 저장되었습니다.`);
-            } catch (err) {
-                console.error(err);
-                statusBadge.className = 'text-xs bg-rose-100 text-rose-800 px-3 py-1 rounded-full font-medium';
-                statusBadge.innerText = '저장 오류: ' + err.message;
-                alert(`시트 저장 실패: ${err.message}\n복사된 TSV 값으로 시트에 붙여넣으시거나 Apps Script 배포 버전을 확인해 주세요.`);
-            } finally {
-                saveBtn.disabled = false;
-                saveBtn.innerText = '누적원금 · 평가손익 · 누적배당 계산 및 시트 저장';
-            }
         });
 
         document.getElementById('copyRowBtn').addEventListener('click', async function() {
@@ -345,11 +296,11 @@
             if (!tsvInput.value) return;
             try {
                 await navigator.clipboard.writeText(tsvInput.value);
-                alert('시트 붙여넣기용 행 데이터가 복사되었습니다! Google 시트의 빈 행 A열에 Ctrl+V로 붙여넣으세요.');
+                alert('시트 붙여넣기용 행 데이터가 복사되었습니다!');
             } catch (err) {
                 tsvInput.select();
                 document.execCommand('copy');
-                alert('복사되었습니다! Google 시트에 붙여넣으세요.');
+                alert('복사되었습니다!');
             }
         });
 

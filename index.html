@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+    <base target="_top">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <title>종합 대시보드 - 주식 자산 관리</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -10,88 +10,154 @@
 </head>
 <body class="bg-gray-50 min-h-screen">
     <!-- 내비게이션 바 -->
-    <nav class="bg-white border-b border-gray-200 px-6 py-4 flex flex-wrap justify-between items-center gap-3 shadow-sm">
-        <h1 class="text-xl font-bold text-gray-800">📈 투자 포트폴리오 대시보드</h1>
-        <div class="flex items-center space-x-4">
-            <span id="statusBadge" class="text-xs bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-medium">온라인 시트 불러오는 중...</span>
-            <a href="index.html" class="font-semibold text-blue-600 border-b-2 border-blue-600 pb-1">1. 대시보드</a>
-            <a href="input.html" class="text-gray-500 hover:text-gray-800 pb-1">2. 데이터 입력</a>
+    <nav class="bg-white border-b border-gray-200 px-4 sm:px-6 py-3.5 sm:py-4 flex flex-wrap justify-between items-center gap-2.5 shadow-sm">
+        <h1 class="text-lg sm:text-xl font-bold text-gray-800">📈 투자 포트폴리오 대시보드</h1>
+        <div class="flex items-center space-x-3 sm:space-x-4 text-sm sm:text-base">
+            <span id="statusBadge" class="text-[11px] sm:text-xs bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full font-medium">불러오는 중...</span>
+            <a href="<?= appUrl ?>?page=index" class="font-semibold text-blue-600 border-b-2 border-blue-600 pb-0.5">1. 대시보드</a>
+            <a href="<?= appUrl ?>?page=input" class="text-gray-500 hover:text-gray-800 pb-0.5">2. 데이터 입력</a>
         </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto p-6 space-y-6">
+    <main class="max-w-7xl mx-auto p-3.5 sm:p-6 space-y-4 sm:space-y-6">
         <!-- 상단 요약 카드 -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-blue-500">
-                <p class="text-sm text-gray-500 font-medium">총자산 (최근 평가액)</p>
-                <p id="cardTotalAsset" class="text-3xl font-bold text-gray-900 mt-2">0 원</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-6">
+            <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border-l-4 border-blue-500">
+                <p class="text-xs sm:text-sm text-gray-500 font-medium">총자산 (최근 평가액)</p>
+                <p id="cardTotalAsset" class="text-2xl sm:text-3xl font-bold text-gray-900 mt-1.5 sm:mt-2">0 원</p>
                 <p id="cardBaseMonth" class="text-xs text-gray-400 mt-1">기준월: -</p>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-indigo-500">
-                <p class="text-sm text-gray-500 font-medium">누적 손익 / 총 수익률</p>
-                <p id="cardProfit" class="text-3xl font-bold text-indigo-600 mt-2">0 원</p>
+            <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border-l-4 border-indigo-500">
+                <p class="text-xs sm:text-sm text-gray-500 font-medium">누적 손익 / 총 수익률</p>
+                <p id="cardProfit" class="text-2xl sm:text-3xl font-bold text-indigo-600 mt-1.5 sm:mt-2">0 원</p>
                 <p id="cardPrincipal" class="text-xs text-gray-400 mt-1">누적 원금: - · 연환산(IRR): -</p>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-emerald-500">
-                <p class="text-sm text-gray-500 font-medium">올해 순익 / 올해 수익률</p>
-                <p id="cardYearProfit" class="text-3xl font-bold text-emerald-600 mt-2">0 원</p>
+            <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border-l-4 border-emerald-500">
+                <p class="text-xs sm:text-sm text-gray-500 font-medium">올해 순익 / 올해 수익률</p>
+                <p id="cardYearProfit" class="text-2xl sm:text-3xl font-bold text-emerald-600 mt-1.5 sm:mt-2">0 원</p>
                 <p id="cardYearDividend" class="text-xs text-gray-400 mt-1">올해 배당: - · 누적 배당: -</p>
             </div>
         </div>
 
         <!-- 1행: 월별 자산 추이 그래프 -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm">
-            <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
-                <h2 class="text-lg font-bold text-gray-800">월별 자산 및 원금 추이</h2>
-                <span class="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full font-medium">보조 지표: 원금 기준 연 10% · 연 15% 복리 가정</span>
+        <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm">
+            <div class="flex flex-wrap justify-between items-center gap-2 mb-3 sm:mb-4">
+                <h2 class="text-base sm:text-lg font-bold text-gray-800">월별 자산 및 원금 추이</h2>
+                <span class="text-[11px] sm:text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full font-medium">보조 지표: 원금 기준 연 10% · 연 15% 복리 가정</span>
             </div>
-            <div class="relative h-80">
+            <div class="relative h-72 sm:h-80">
                 <canvas id="assetTrendChart"></canvas>
             </div>
         </div>
 
         <!-- 2행: 월별 배당금(막대) + 12개월 평균 배당금(선) -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm">
-            <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
+        <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm">
+            <div class="flex flex-wrap justify-between items-center gap-2 mb-3 sm:mb-4">
                 <div>
-                    <h2 class="text-lg font-bold text-gray-800">월별 배당금 및 12개월 평균 추이</h2>
+                    <h2 class="text-base sm:text-lg font-bold text-gray-800">월별 배당금 및 12개월 평균 추이</h2>
                     <p id="dividendSummarySub" class="text-xs text-gray-500 mt-0.5">누적 배당금: 0 원 · 올해 배당 누계: 0 원</p>
                 </div>
-                <span class="text-xs bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full font-medium">월별 배당(막대) · 12개월 평균(선)</span>
+                <span class="text-[11px] sm:text-xs bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full font-medium">월별 배당(막대) · 12개월 평균(선)</span>
             </div>
-            <div class="relative h-80">
+            <div class="relative h-72 sm:h-80">
                 <canvas id="dividendChart"></canvas>
             </div>
         </div>
 
         <!-- 3행: 성과 비교 그래프 분리 (누적 기간 vs 올해) -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- 왼쪽: 누적 기간 성과 비교 -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-bold text-gray-800">누적 기간 성과 비교 (전체)</h2>
-                    <span class="text-xs bg-indigo-100 text-indigo-800 px-2.5 py-1 rounded-full font-medium">누적 기준</span>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm">
+                <div class="flex justify-between items-center mb-3 sm:mb-4">
+                    <h2 class="text-base sm:text-lg font-bold text-gray-800">누적 기간 성과 비교 (전체)</h2>
+                    <span class="text-[11px] sm:text-xs bg-indigo-100 text-indigo-800 px-2.5 py-1 rounded-full font-medium">누적 기준</span>
                 </div>
-                <div class="relative h-80">
+                <div class="relative h-72 sm:h-80">
                     <canvas id="cumulativeBenchmarkChart"></canvas>
                 </div>
             </div>
 
-            <!-- 오른쪽: 올해(2026년) 성과 비교 -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-bold text-gray-800">올해(2026년) 성과 비교</h2>
-                    <span class="text-xs bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full font-medium">YTD 기준</span>
+            <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm">
+                <div class="flex justify-between items-center mb-3 sm:mb-4">
+                    <h2 class="text-base sm:text-lg font-bold text-gray-800">올해(2026년) 성과 비교</h2>
+                    <span class="text-[11px] sm:text-xs bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full font-medium">YTD 기준</span>
                 </div>
-                <div class="relative h-80">
+                <div class="relative h-72 sm:h-80">
                     <canvas id="ytdBenchmarkChart"></canvas>
                 </div>
             </div>
         </div>
     </main>
 
-    <script src="app.js"></script>
     <script>
+        const isMobile = window.innerWidth < 640;
+
+        function formatKRW(val) {
+            return Math.round(Number(val) || 0).toLocaleString('ko-KR') + ' 원';
+        }
+
+        // Y축 전용 압축 포맷 (모바일에서 억/만 단위로 짧게 표시해 차트 가로폭 확보)
+        function formatAxisKRW(val) {
+            const num = Number(val) || 0;
+            if (Math.abs(num) >= 100000000) {
+                const eok = num / 100000000;
+                return (Number.isInteger(eok) ? eok : eok.toFixed(1)) + '억';
+            }
+            if (Math.abs(num) >= 10000) {
+                const man = Math.round(num / 10000);
+                return man.toLocaleString('ko-KR') + '만';
+            }
+            return num.toLocaleString('ko-KR');
+        }
+
+        function getCompactLegendOptions() {
+            return {
+                position: 'top',
+                labels: {
+                    boxWidth: isMobile ? 12 : 24,
+                    boxHeight: isMobile ? 6 : 10,
+                    padding: isMobile ? 8 : 14,
+                    font: { size: isMobile ? 11 : 12 }
+                }
+            };
+        }
+
+        function getCompactScaleOptions(yFormatter) {
+            return {
+                x: {
+                    ticks: {
+                        font: { size: isMobile ? 10 : 11 },
+                        maxRotation: isMobile ? 45 : 0,
+                        autoSkip: true,
+                        maxTicksLimit: isMobile ? 7 : 14
+                    }
+                },
+                y: {
+                    ticks: {
+                        font: { size: isMobile ? 10 : 11 },
+                        padding: isMobile ? 2 : 6,
+                        callback: yFormatter
+                    }
+                }
+            };
+        }
+
+        function calcIndexReturns(items, key, startIndex) {
+            let baseVal = null;
+            for (let i = startIndex; i < items.length; i++) {
+                const v = items[i][key];
+                if (v !== null && v !== undefined && !Number.isNaN(Number(v)) && Number(v) > 0) {
+                    baseVal = Number(v);
+                    break;
+                }
+            }
+            return items.map((item, idx) => {
+                if (idx < startIndex || baseVal === null) return null;
+                const v = item[key];
+                if (v === null || v === undefined || Number.isNaN(Number(v)) || Number(v) <= 0) return null;
+                return Number((((Number(v) - baseVal) / baseVal) * 100).toFixed(2));
+            });
+        }
+
         function buildTargetGrowthCurve(items, annualRate) {
             const monthlyRate = Math.pow(1 + annualRate, 1 / 12) - 1;
             let simulatedAsset = 0;
@@ -109,7 +175,6 @@
             });
         }
 
-        // 적립식 현금흐름을 반영한 실제 연환산 내부수익률(IRR) 계산
         function calculateAnnualizedIRR(items) {
             if (!items || items.length < 2) return null;
 
@@ -120,12 +185,10 @@
                     cashFlows.push(-currPrincipal);
                 } else {
                     const prevPrincipal = Number(items[i - 1].cumulativePrincipal) || 0;
-                    const contribution = currPrincipal - prevPrincipal;
-                    cashFlows.push(-contribution);
+                    cashFlows.push(-(currPrincipal - prevPrincipal));
                 }
             }
 
-            // 마지막 시점의 최종 평가액 유입 반영
             const finalAsset = Number(items[items.length - 1].totalAsset) || 0;
             cashFlows[cashFlows.length - 1] += finalAsset;
 
@@ -141,7 +204,6 @@
             let high = 2.0;
             let npvLow = npv(low);
             let npvHigh = npv(high);
-
             if (npvLow * npvHigh > 0) return null;
 
             for (let iter = 0; iter < 80; iter++) {
@@ -165,16 +227,11 @@
             return Number.isFinite(annualIRR) ? annualIRR * 100 : null;
         }
 
-        async function initDashboard() {
+        function renderDashboard(res) {
             const statusBadge = document.getElementById('statusBadge');
             try {
-                if (typeof fetchOnlineSheetData !== 'function') {
-                    throw new Error('app.js의 fetchOnlineSheetData 함수를 찾을 수 없습니다.');
-                }
+                const rawItems = (res && res.items) ? res.items : [];
 
-                const rawItems = await fetchOnlineSheetData();
-
-                // 1. 배당금 집계 (월만 존재하면 총자산 0원 행의 배당금도 누락 없이 누적 합산)
                 const dividendItems = rawItems.filter(item => item.month);
                 let runningDividend = 0;
                 const dividendMap = {};
@@ -190,7 +247,6 @@
                     .filter(item => String(item.month).startsWith('2026-'))
                     .reduce((acc, cur) => acc + Math.round(Number(cur.dividend) || 0), 0);
 
-                // 2. 자산/수익률 차트용 (총자산 입력된 행 기준)
                 const validItems = rawItems.filter(item => item.month && Number(item.totalAsset) > 0);
                 if (validItems.length === 0) {
                     throw new Error('시트에 표시할 데이터가 없습니다.');
@@ -207,14 +263,11 @@
                     ? ((latest.profit / latest.cumulativePrincipal) * 100).toFixed(1)
                     : '0.0';
 
-                // 실제 연환산 내부수익률(IRR) 산출
                 const annualIrrPct = calculateAnnualizedIRR(enrichedItems);
                 const irrText = annualIrrPct !== null ? `${annualIrrPct.toFixed(1)}%` : '-';
 
-                // 작년 말(2025-12) 기준 평가손익 증감 및 올해 수익률 계산 (배당 중복 합산 제외)
                 const prevYearLast = enrichedItems.find(item => item.month === '2025-12') || enrichedItems[0];
-                const ytdProfitGain = (Number(latest.profit) || 0) - (prevYearLast ? (Number(prevYearLast.profit) || 0) : 0);
-                const ytdNetProfit = ytdProfitGain;
+                const ytdNetProfit = (Number(latest.profit) || 0) - (prevYearLast ? (Number(prevYearLast.profit) || 0) : 0);
 
                 let ytdRatePct = '0.0';
                 if (latest.ytdReturn !== null && latest.ytdReturn !== undefined && !Number.isNaN(Number(latest.ytdReturn))) {
@@ -223,7 +276,6 @@
                     ytdRatePct = ((ytdNetProfit / Number(prevYearLast.totalAsset)) * 100).toFixed(1);
                 }
 
-                // 요약 카드 반영
                 document.getElementById('cardTotalAsset').innerText = formatKRW(latest.totalAsset);
                 document.getElementById('cardBaseMonth').innerText = `기준월: ${latest.month}`;
                 document.getElementById('cardProfit').innerText = `${formatKRW(latest.profit)} (${cumRatePct}%)`;
@@ -232,75 +284,36 @@
                 document.getElementById('cardYearDividend').innerText = `올해 배당: ${formatKRW(ytdDividendSum)} · 누적 배당: ${formatKRW(totalCumulativeDividend)}`;
                 document.getElementById('dividendSummarySub').innerText = `누적 배당금: ${formatKRW(totalCumulativeDividend)} · 올해 배당 누계: ${formatKRW(ytdDividendSum)}`;
 
-                statusBadge.className = 'text-xs bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-medium';
-                statusBadge.innerText = '온라인 시트 연동됨';
+                statusBadge.className = 'text-[11px] sm:text-xs bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full font-medium';
+                statusBadge.innerText = 'Google 계정 보안 연동됨';
 
                 const labels = enrichedItems.map(item => item.month);
-
-                // 원금 기준 연 10% 및 연 15% 복리 수익 가정 곡선 계산
                 const target10PctCurve = buildTargetGrowthCurve(enrichedItems, 0.10);
                 const target15PctCurve = buildTargetGrowthCurve(enrichedItems, 0.15);
 
-                // 1. 월별 자산 추이 차트 (주식 총액 + 연 15% 가정 + 연 10% 가정 + 누적 원금)
                 new Chart(document.getElementById('assetTrendChart'), {
                     type: 'line',
                     data: {
                         labels: labels,
                         datasets: [
-                            {
-                                label: '주식 총액',
-                                data: enrichedItems.map(item => item.totalAsset),
-                                borderColor: 'rgb(59, 130, 246)',
-                                backgroundColor: 'rgba(59, 130, 246, 0.08)',
-                                tension: 0.2,
-                                borderWidth: 2.5
-                            },
-                            {
-                                label: '연 15% 수익 가정',
-                                data: target15PctCurve,
-                                borderColor: 'rgb(139, 92, 246)',
-                                borderDash: [6, 4],
-                                tension: 0.2,
-                                borderWidth: 2,
-                                pointRadius: 2
-                            },
-                            {
-                                label: '연 10% 수익 가정',
-                                data: target10PctCurve,
-                                borderColor: 'rgb(16, 185, 129)',
-                                borderDash: [6, 4],
-                                tension: 0.2,
-                                borderWidth: 2,
-                                pointRadius: 2
-                            },
-                            {
-                                label: '누적 원금',
-                                data: enrichedItems.map(item => item.cumulativePrincipal),
-                                borderColor: 'rgb(156, 163, 175)',
-                                borderDash: [3, 3],
-                                tension: 0.2,
-                                borderWidth: 2
-                            }
+                            { label: '주식 총액', data: enrichedItems.map(item => item.totalAsset), borderColor: 'rgb(59, 130, 246)', backgroundColor: 'rgba(59, 130, 246, 0.08)', tension: 0.2, borderWidth: 2.5, pointRadius: isMobile ? 1.5 : 3 },
+                            { label: '연 15% 가정', data: target15PctCurve, borderColor: 'rgb(139, 92, 246)', borderDash: [6, 4], tension: 0.2, borderWidth: 2, pointRadius: isMobile ? 1 : 2 },
+                            { label: '연 10% 가정', data: target10PctCurve, borderColor: 'rgb(16, 185, 129)', borderDash: [6, 4], tension: 0.2, borderWidth: 2, pointRadius: isMobile ? 1 : 2 },
+                            { label: '누적 원금', data: enrichedItems.map(item => item.cumulativePrincipal), borderColor: 'rgb(156, 163, 175)', borderDash: [3, 3], tension: 0.2, borderWidth: 2, pointRadius: isMobile ? 1 : 2.5 }
                         ]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        interaction: {
-                            mode: 'index',
-                            intersect: false
-                        },
+                        interaction: { mode: 'index', intersect: false },
+                        scales: getCompactScaleOptions((v) => formatAxisKRW(v)),
                         plugins: {
-                            tooltip: {
-                                callbacks: {
-                                    label: (ctx) => `${ctx.dataset.label}: ${formatKRW(ctx.parsed.y ?? 0)}`
-                                }
-                            }
+                            legend: getCompactLegendOptions(),
+                            tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${formatKRW(ctx.parsed.y ?? 0)}` } }
                         }
                     }
                 });
 
-                // 2. 월별 배당금(막대) + 12개월 평균 배당금(선)
                 const divChartItems = dividendItems.filter(item => Number(item.totalAsset) > 0 || Number(item.dividend) > 0);
                 const divLabels = divChartItems.map(item => item.month);
                 const monthlyDividends = divChartItems.map(item => Math.round(Number(item.dividend) || 0));
@@ -317,33 +330,16 @@
                     data: {
                         labels: divLabels,
                         datasets: [
-                            {
-                                type: 'bar',
-                                label: '월별 배당금',
-                                data: monthlyDividends,
-                                backgroundColor: 'rgba(16, 185, 129, 0.65)',
-                                borderColor: 'rgb(16, 185, 129)',
-                                borderWidth: 1,
-                                borderRadius: 4,
-                                order: 2
-                            },
-                            {
-                                type: 'line',
-                                label: '12개월 평균 배당금',
-                                data: rolling12AvgDividends,
-                                borderColor: 'rgb(245, 158, 11)',
-                                backgroundColor: 'rgba(245, 158, 11, 0.15)',
-                                tension: 0.25,
-                                borderWidth: 2.5,
-                                pointRadius: 2.5,
-                                order: 1
-                            }
+                            { type: 'bar', label: '월별 배당금', data: monthlyDividends, backgroundColor: 'rgba(16, 185, 129, 0.65)', borderColor: 'rgb(16, 185, 129)', borderWidth: 1, borderRadius: 4, order: 2 },
+                            { type: 'line', label: '12개월 평균', data: rolling12AvgDividends, borderColor: 'rgb(245, 158, 11)', backgroundColor: 'rgba(245, 158, 11, 0.15)', tension: 0.25, borderWidth: 2.5, pointRadius: isMobile ? 1.5 : 2.5, order: 1 }
                         ]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        scales: getCompactScaleOptions((v) => formatAxisKRW(v)),
                         plugins: {
+                            legend: getCompactLegendOptions(),
                             tooltip: {
                                 callbacks: {
                                     label: (ctx) => `${ctx.dataset.label}: ${formatKRW(ctx.parsed.y ?? 0)}`,
@@ -358,63 +354,56 @@
                     }
                 });
 
-                // 3. 누적 기간 성과 비교 (전체 기간 기준)
                 const myCumRates = enrichedItems.map(item =>
                     item.cumulativePrincipal > 0 ? Number(((item.profit / item.cumulativePrincipal) * 100).toFixed(2)) : null
                 );
-                const sp500CumRates = calcIndexReturns(enrichedItems, 'sp500', 0);
-                const nasdaqCumRates = calcIndexReturns(enrichedItems, 'nasdaq', 0);
-                const kospiCumRates = calcIndexReturns(enrichedItems, 'kospi', 0);
 
                 new Chart(document.getElementById('cumulativeBenchmarkChart'), {
                     type: 'line',
                     data: {
                         labels: labels,
                         datasets: [
-                            { label: '내 계좌 누적(%)', data: myCumRates, borderColor: 'rgb(79, 70, 229)', tension: 0.25, borderWidth: 2.5, spanGaps: true },
-                            { label: 'S&P 500 누적(%)', data: sp500CumRates, borderColor: 'rgb(239, 68, 68)', tension: 0.25, borderWidth: 2, spanGaps: true },
-                            { label: '나스닥 누적(%)', data: nasdaqCumRates, borderColor: 'rgb(245, 158, 11)', tension: 0.25, borderWidth: 2, spanGaps: true },
-                            { label: 'KOSPI 누적(%)', data: kospiCumRates, borderColor: 'rgb(107, 114, 128)', tension: 0.25, borderWidth: 2, spanGaps: true }
+                            { label: '내 계좌(%)', data: myCumRates, borderColor: 'rgb(79, 70, 229)', tension: 0.25, borderWidth: 2.5, spanGaps: true, pointRadius: isMobile ? 1 : 2.5 },
+                            { label: 'S&P 500(%)', data: calcIndexReturns(enrichedItems, 'sp500', 0), borderColor: 'rgb(239, 68, 68)', tension: 0.25, borderWidth: 2, spanGaps: true, pointRadius: isMobile ? 1 : 2 },
+                            { label: '나스닥(%)', data: calcIndexReturns(enrichedItems, 'nasdaq', 0), borderColor: 'rgb(245, 158, 11)', tension: 0.25, borderWidth: 2, spanGaps: true, pointRadius: isMobile ? 1 : 2 },
+                            { label: 'KOSPI(%)', data: calcIndexReturns(enrichedItems, 'kospi', 0), borderColor: 'rgb(107, 114, 128)', tension: 0.25, borderWidth: 2, spanGaps: true, pointRadius: isMobile ? 1 : 2 }
                         ]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        scales: getCompactScaleOptions((v) => `${v}%`),
                         plugins: {
+                            legend: getCompactLegendOptions(),
                             tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y ?? '-'}%` } }
                         }
                     }
                 });
 
-                // 4. 올해(2026년) 성과 비교 (YTD 기준)
                 const ytdStartIdx = enrichedItems.findIndex(item => String(item.month).startsWith('2026-'));
                 const ytdSlice = ytdStartIdx >= 0 ? enrichedItems.slice(ytdStartIdx) : [];
                 const ytdLabels = ytdSlice.map(item => item.month);
-
                 const myYtdRates = ytdSlice.map(item =>
-                    item.ytdReturn !== null && item.ytdReturn !== undefined
-                        ? Number((Number(item.ytdReturn) * 100).toFixed(2))
-                        : null
+                    item.ytdReturn !== null && item.ytdReturn !== undefined ? Number((Number(item.ytdReturn) * 100).toFixed(2)) : null
                 );
-                const sp500YtdRates = ytdStartIdx >= 0 ? calcIndexReturns(enrichedItems, 'sp500', ytdStartIdx).slice(ytdStartIdx) : [];
-                const nasdaqYtdRates = ytdStartIdx >= 0 ? calcIndexReturns(enrichedItems, 'nasdaq', ytdStartIdx).slice(ytdStartIdx) : [];
-                const kospiYtdRates = ytdStartIdx >= 0 ? calcIndexReturns(enrichedItems, 'kospi', ytdStartIdx).slice(ytdStartIdx) : [];
 
                 new Chart(document.getElementById('ytdBenchmarkChart'), {
                     type: 'line',
                     data: {
                         labels: ytdLabels,
                         datasets: [
-                            { label: '내 계좌 올해(%)', data: myYtdRates, borderColor: 'rgb(16, 185, 129)', tension: 0.25, borderWidth: 2.5, spanGaps: true },
-                            { label: 'S&P 500 올해(%)', data: sp500YtdRates, borderColor: 'rgb(239, 68, 68)', tension: 0.25, borderWidth: 2, spanGaps: true },
-                            { label: '나스닥 올해(%)', data: nasdaqYtdRates, borderColor: 'rgb(245, 158, 11)', tension: 0.25, borderWidth: 2, spanGaps: true },
-                            { label: 'KOSPI 올해(%)', data: kospiYtdRates, borderColor: 'rgb(107, 114, 128)', tension: 0.25, borderWidth: 2, spanGaps: true }
+                            { label: '내 계좌(%)', data: myYtdRates, borderColor: 'rgb(16, 185, 129)', tension: 0.25, borderWidth: 2.5, spanGaps: true, pointRadius: isMobile ? 1.5 : 3 },
+                            { label: 'S&P 500(%)', data: ytdStartIdx >= 0 ? calcIndexReturns(enrichedItems, 'sp500', ytdStartIdx).slice(ytdStartIdx) : [], borderColor: 'rgb(239, 68, 68)', tension: 0.25, borderWidth: 2, spanGaps: true, pointRadius: isMobile ? 1 : 2 },
+                            { label: '나스닥(%)', data: ytdStartIdx >= 0 ? calcIndexReturns(enrichedItems, 'nasdaq', ytdStartIdx).slice(ytdStartIdx) : [], borderColor: 'rgb(245, 158, 11)', tension: 0.25, borderWidth: 2, spanGaps: true, pointRadius: isMobile ? 1 : 2 },
+                            { label: 'KOSPI(%)', data: ytdStartIdx >= 0 ? calcIndexReturns(enrichedItems, 'kospi', ytdStartIdx).slice(ytdStartIdx) : [], borderColor: 'rgb(107, 114, 128)', tension: 0.25, borderWidth: 2, spanGaps: true, pointRadius: isMobile ? 1 : 2 }
                         ]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        scales: getCompactScaleOptions((v) => `${v}%`),
                         plugins: {
+                            legend: getCompactLegendOptions(),
                             tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y ?? '-'}%` } }
                         }
                     }
@@ -422,11 +411,20 @@
             } catch (err) {
                 console.error(err);
                 statusBadge.className = 'text-xs bg-rose-100 text-rose-800 px-3 py-1 rounded-full font-medium';
-                statusBadge.innerText = '연동 오류: ' + err.message;
+                statusBadge.innerText = '오류: ' + err.message;
             }
         }
 
-        initDashboard();
+        function handleServerError(err) {
+            const statusBadge = document.getElementById('statusBadge');
+            statusBadge.className = 'text-xs bg-rose-100 text-rose-800 px-3 py-1 rounded-full font-medium';
+            statusBadge.innerText = '서버 오류: ' + (err && err.message ? err.message : err);
+        }
+
+        google.script.run
+            .withSuccessHandler(renderDashboard)
+            .withFailureHandler(handleServerError)
+            .getPortfolioData();
     </script>
 </body>
 </html>
